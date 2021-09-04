@@ -42,7 +42,11 @@ class SubscanClient:
 			data = { 'error' : error_message }
 		return data
 
+	# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+	#
 	# General API
+	#
+	# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
 	# Subscan server timestamp
 	def general_timestamp(self):
@@ -76,7 +80,7 @@ class SubscanClient:
 		return self._subscan_post(path, data)
 
 	# Get a list of extrinsics.
-	def general_extrinsics(self, 
+	def general_extrinsics(self,
 		signed=None,
 		address=None,
 		module=None,
@@ -207,7 +211,169 @@ class SubscanClient:
 		path = '{}scan/token'.format(self.root_url)
 		return self._subscan_post(path)
 
+	# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+	#
+	# STAKING API
+	#
+	# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
+	# Get the sum of staking rewards for an address.
+	def staking_reward_sum(self, address: str, row=20, page=1):
+		path = '{}scan/staking_history'.format(self.root_url)
+		data = {
+			'address' : address,
+			'row' : row,
+			'page' : page,
+		}
+		return self._subscan_post(path, data)
+
+	# status:  'unbonding', 'bonded'
+	# address: address of interest
+	# locked:  0 or 1
+	def staking_bond_list(self, status: str, address: str, locked=None, row=20, page=1):
+		path = '{}wallet/bond_list'.format(self.root_url)
+		data = {
+			'status' : status,
+			'address' : address,
+			'row' : row,
+			'page' : page,
+		}
+		if locked:
+			assert(int(locked) == 0 or int(locked) == 1)
+			data['locked'] = locked
+		return self._subscan_post(path, data)
+
+	# Information on validators who are in the active set.
+	#
+	# key:         int?
+	# order:       'desc', 'asc'
+	# order_field: 'rank_validator', 'bonded_nominators', 'bonded_owner', 'count_nominators',
+	#              'validator_prefs_value'
+	def staking_validators(self, key=None, order=None, order_field=None):
+		path = '{}scan/staking/validators'.format(self.root_url)
+		data = {}
+		if key:
+			data['key'] = key
+		if order:
+			data['order'] = order
+		if order_field:
+			data['order_field'] = order_field
+		return self._subscan_post(path, data)
+
+	# Information on waiting validators.
+	#
+	# key:         int?
+	# order:       'desc', 'asc'
+	# order_field: 'bonded_nominators', 'bonded_owner', 'count_nominators', 'validator_prefs_value'
+	def staking_waiting_validator(self, key=None, order=None, order_field=None):
+		path = '{}scan/staking/waiting'.format(self.root_url)
+		data = {}
+		if key:
+			data['key'] = key
+		if order:
+			data['order'] = order
+		if order_field:
+			data['order_field'] = order_field
+		return self._subscan_post(path, data)
+
+	# Information about nominees.
+	#
+	# address:     address
+	# order:       'asc', 'desc'
+	# order_field: 'bonded_nominators', 'bonded_owner', 'count_nominators', 'validator_prefs_value'
+	def staking_voted(self, address: str, order=None, order_field=None):
+		path = '{}scan/staking/voted'.format(self.root_url)
+		data = { 'address' : address }
+		if order:
+			data['order'] = order
+		if order_field:
+			data['order_field'] = order_field
+		return self._subscan_post(path, data)
+
+	# Information about nominators.
+	#
+	# address:     address
+	# order:       'asc', 'desc'
+	# order_field: 'rank_nominator', 'bonded'
+	def staking_nominators(self, address: str, order=None, order_field=None, row=20, page=1):
+		path = '{}scan/staking/nominators'.format(self.root_url)
+		data = {
+			'address' : address,
+			'row' : row,
+			'page' : page,
+		}
+		if order:
+			data['order'] = order
+		if order_field:
+			data['order_field'] = order_field
+		return self._subscan_post(path, data)
+
+	# Stats about a list of eras for an address.
+	def staking_era_stat(self, address: str, row=20, page=1):
+		path = '{}scan/staking/era_stat'.format(self.root_url)
+		data = {
+			'address' : address,
+			'row' : row,
+			'page' : page,
+		}
+		return self._subscan_post(path, data)
+
+	# Information about a particular validator.
+	def staking_validator(self, stash: str):
+		path = '{}scan/staking/validator'.format(self.root_url)
+		data = { 'stash' : stash }
+		return self._subscan_post(path, data)
+
+	# Stats about a stash.
+	def staking_bond_stat(self, stash: str, row=20, page=1):
+		path = '{}scan/staking/validator/bond_stat'.format(self.root_url)
+		data = {
+			'stash' : stash,
+			'row' : row,
+			'page' : page,
+		}
+		return self._subscan_post(path, data)
+
+	# Information about rewards and slashes on a particular address. For rewards, this is the
+	# reward destination, which may not be the stash.
+	def staking_reward_slash(self, address: str, row=20, page=1):
+		path = '{}scan/account/reward_slash'.format(self.root_url)
+		data = {
+			'address' : address,
+			'row' : row,
+			'page' : page,
+		}
+		return self._subscan_post(path, data)
+
+	# Unbonding chunks of an address.
+	def staking_unbonding(self, address: str):
+		path = '{}scan/staking/unbonding'.format(self.root_url)
+		data = { 'address' : address }
+		return self._subscan_post(path, data)
+
+	# Information about a particular nominator.
+	def staking_nominator(self, address: str):
+		path = '{}scan/staking/nominator'.format(self.root_url)
+		data = { 'address' : address }
+		return self._subscan_post(path, data)
+
+	# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+	#
+	# PRICE API
+	#
+	# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+
+	# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+	#
+	# GOVERNANCE API
+	#
+	# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+
+	# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+	#
+	# RUNTIME API
+	#
+	# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 '''
 OLD API, NEED TO UPDATE
 
