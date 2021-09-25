@@ -4,7 +4,7 @@ import time
 
 class SubscanClient:
 	def __init__(self, network, api_key):
-		self.root_url = 'https://{}.subscan.io/api/'.format(network)
+		self.root_url = 'https://{}.api.subscan.io/api/'.format(network)
 		self.api_key = api_key
 
 	# Request some data from the Subscan API.
@@ -44,17 +44,32 @@ class SubscanClient:
 
 	# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 	#
+	# v2
+	#
+	# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+
+	def v2_accounts(self, key, row=20, page=1):
+		path = self.root_url + 'v2/scan/search'
+		data = {
+			'key': str(key),
+			'row': row,
+			'page': page,
+		}
+		return self._subscan_post(path, data)
+
+	# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+	#
 	# General API
 	#
 	# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
 	# Subscan server timestamp
 	def general_timestamp(self):
-		return self._subscan_post(self.root_url + 'now')
+		return self._subscan_post(self.root_url + 'now', {})
 
 	# Subscan global stats
 	def general_metadata(self):
-		return self._subscan_post(self.root_url + 'scan/metadata')
+		return self._subscan_post(self.root_url + 'scan/metadata', {})
 
 	# Array of blocks from the connected chain. Requires `row` and `page`.
 	def general_blocks(self, row=20, page=1):
@@ -209,7 +224,7 @@ class SubscanClient:
 	# Information about the network token.
 	def general_token(self):
 		path = '{}scan/token'.format(self.root_url)
-		return self._subscan_post(path)
+		return self._subscan_post(path, {})
 
 	# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 	#
